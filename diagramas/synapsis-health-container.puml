@@ -1,0 +1,49 @@
+@startuml synapsis-containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Title Synapsis Health - Container Diagram
+' Pessoas (reaproveita atores do contexto)
+Person(admin, "Administrador")
+Person(secretaria, "Secretária")
+Person(medico, "Médico")
+Person(paciente, "Paciente")
+Person(gestor, "Gestor da Clínica")
+Person(suporte, "SAC")
+
+System_Ext(config_server, "Config service (CI/CD)")
+System_Ext(messageria_aws, "Mensageria (AWS Lambda / SNS)")
+System_Ext(conv, "Sistema de convênios")
+System_Ext(billing, "Gateway de pagamentos")
+System_Ext(marketing, "Plataforma de marketing / CRM médico")
+System_Ext(cloud, "Infraestrutura cloud (AWS)")
+
+System_Boundary(core, "Synapsis Health") {
+    Container(web_app, "Web UI/UX", "React / TypeScript", "Interface web para secretárias, médicos, gestores e pacientes (pwa).")
+    Container(api, "API Gateway / Backend", "Java SpingBoot (Axios) / REST + PostgreeSQL", "Orquestra fluxos de negócio, validações, orquestra chamadas para serviços internos e externos.")
+    Container(chat, "ChatBot/ SAC", "DEFINIR TECNOLOGIA", "Chatbot automatizado com suporte para atendimento com operador humano.")
+}
+
+' Relações - Pessoas -> Containers
+Rel(secretaria, web_app, "Usa", "HTTPS/JSON")
+Rel(medico, web_app, "Usa", "HTTPS/JSON / Push notifications")
+Rel(paciente, web_app, "Usa", "HTTPS/JSON")
+Rel(gestor, web_app, "Usa", "HTTPS/JSON")
+Rel(admin, web_app, "Usa (admin UI)", "HTTPS/JSON")
+Rel(admin, api, "Usa (admin API)", "HTTPS/JSON")
+
+' Web
+Rel(web_app, api, "API calls (UI -> Backend)", "HTTPS/JSON / JWT")
+Rel(billing, web_app, "o sistema fornece a integração com a ferramenta", "HTTPS/JSON")
+Rel(conv, web_app, "o convênio fornece API para integração", "HTTPS")
+Rel(chat, suporte, "atendimento via chat no sistema", "")
+Rel(suporte, web_app, "acecsso ao sistema para suporte ao cliente")
+
+' Banco de Dados
+Rel(api, billing, "integrado ao backend, envia resposta para interface", "")
+Rel(api, config_server, "Busca configs e feature flags (CI/CD)", "HTTP/REST")
+Rel(api, cloud, "Armazenamento", "REST")
+Rel(api, messageria_aws, "envia notificações", "")
+Rel(api, marketing, "Salesforce", "")
+
+
+@enduml

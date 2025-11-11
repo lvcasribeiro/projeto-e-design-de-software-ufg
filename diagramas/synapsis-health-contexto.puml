@@ -1,0 +1,41 @@
+@startuml generic-contexto
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Synapsis Health - Sistema de gestão de agendamentos de clínicas médicas - Diagrama de contexto
+
+' Atores:
+Person(admin, "Administrador", "Gerencia infraestrutura, pipelines, manutenção e treinamento.")
+Person(secretaria, "Secretária", "Gerencia consultas e visualiza a agenda dos médicos.")
+Person(medico, "Médico", "Consulta sua agenda e histórico de atendimentos, recebe notificações.")
+Person(paciente, "Paciente", "Agenda consultas, consulta histórico e recebe notificações.")
+Person(gestor, "Gestor da Clínica", "Acompanha relatórios e indicadores, auxilia no suporte técnico.")
+
+' Sistema principal:
+System(core, "Synapsis Health", "Sistema de gestão de agendamentos para clínicas médicas.")
+
+' Sistemas externos principais:
+System_Ext(config_server, "Config service (CI/CD)", "Serviço de configuração centralizada para build, test e deploy do sistema.")
+System_Ext(messageria_aws, "Mensageria (AWS Lambda / SNS)", "Envia notificações automáticas via WhatsApp/Telegram/SMS.")
+System_Ext(conv, "Sistema de convênios", "Integra disponibilidade e regras de cobertura de consultas.")
+System_Ext(billing, "Gateway de pagamentos", "Processa pagamentos e assinaturas das clínicas (Stripe / Pagar.me).")
+' System_Ext(bi, "Serviço de analytics / BI", "Gera relatórios e dashboards de ocupação e rentabilidade.")
+System_Ext(marketing, "Plataforma de marketing / CRM médico", "Automatiza campanhas e fidelização de pacientes.")
+System_Ext(cloud, "Infraestrutura cloud (AWS)", "Hospeda e provê escalabilidade e disponibilidade.")
+
+' Relações entre atores e sistema:
+Rel(admin, core, "Gerencia usuários, especialidades e políticas de cancelamento", "HTTPS/JSON")
+Rel(secretaria, core, "Gerencia consultas e agendas médicas", "HTTPS/JSON")
+Rel(medico, core, "Consulta e organiza sua própria agenda", "HTTPS/JSON")
+Rel(paciente, core, "Agenda consultas e consulta histórico", "HTTPS/JSON")
+Rel(gestor, core, "Gera relatórios e indicadores de desempenho", "HTTPS/JSON")
+
+' Relações externas:
+Rel(core, config_server, "Consulta parâmetros de configuração", "HTTP/REST")
+Rel(core, messageria_aws, "Envia notificações automáticas", "AWS EC2 ou Lightsail")
+Rel(core, conv, "Consulta informações de convênios e planos", "REST / TISS")
+Rel(core, billing, "Registra pagamentos e faturas", "HTTPS / API de Pagamentos")
+' Rel(core, bi, "Envia dados analíticos", "ETL / API interna")
+Rel(core, marketing, "Compartilha dados de engajamento", "HTTPS / API REST")
+Rel(core, cloud, "Hospedagem e armazenamento de dados (base de dados)", "Infraestrutura")
+
+@enduml

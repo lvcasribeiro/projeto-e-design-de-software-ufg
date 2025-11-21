@@ -12,15 +12,28 @@ Person(suporte, "SAC")
 
 System_Ext(config_server, "Config service (CI/CD)")
 System_Ext(messageria_aws, "Mensageria (AWS Lambda / SNS)")
-System_Ext(conv, "Sistema de convênios")
-System_Ext(billing, "Gateway de pagamentos")
+System_Ext(conv, "Sistema de convênios (API)")
+System_Ext(billing, "Gateway de pagamentos (Stripe)")
 System_Ext(marketing, "Plataforma de marketing / CRM médico")
-System_Ext(cloud, "Infraestrutura cloud (AWS)")
+System_Ext(aws_DB, "Amazon RDS / Aurora (PostgreSQL)", "DBaaS - armazena dados transacionais e esquemas")
+System_Ext(aws_secrets, "AWS Secrets Manager", "Gerencia credenciais DB", "HTTPS/JSON")
 
 System_Boundary(core, "Synapsis Health") {
     Container(web_app, "Web UI/UX", "React / TypeScript", "Interface web para secretárias, médicos, gestores e pacientes (pwa).")
     Container(api, "API Gateway / Backend", "Java SpingBoot (Axios) / REST + PostgreeSQL", "Orquestra fluxos de negócio, validações, orquestra chamadas para serviços internos e externos.")
-    Container(chat, "ChatBot/ SAC", "DEFINIR TECNOLOGIA", "Chatbot automatizado com suporte para atendimento com operador humano.")
+    Container(chat, "ChatBot", "", "Chatbot automatizado com suporte para atendimento com operador humano.")
+}
+
+node "Arquivo de Log (local)" as log_file <<Resource>>
+
+package "Interações externas (indiretas)" as externos {
+
+  System_Ext(grafana_agent, "Agente de Telemetria", "Coleta logs/traces e encaminha")
+  System_Ext(tempo, "Coletor de Traces", "Armazenamento/consulta de traces")
+
+  note bottom of grafana_agent
+ Interação indireta: agente lê o arquivo de log local e publica remotamente.
+end note
 }
 
 ' Relações - Pessoas -> Containers
@@ -34,16 +47,20 @@ Rel(admin, api, "Usa (admin API)", "HTTPS/JSON")
 ' Web
 Rel(web_app, api, "API calls (UI -> Backend)", "HTTPS/JSON / JWT")
 Rel(billing, web_app, "o sistema fornece a integração com a ferramenta", "HTTPS/JSON")
-Rel(conv, web_app, "o convênio fornece API para integração", "HTTPS")
+Rel_Up(conv, api, "o convênio fornece API para integração", "HTTPS")
 Rel(chat, suporte, "atendimento via chat no sistema", "")
 Rel(suporte, web_app, "acecsso ao sistema para suporte ao cliente")
 
 ' Banco de Dados
 Rel(api, billing, "integrado ao backend, envia resposta para interface", "")
 Rel(api, config_server, "Busca configs e feature flags (CI/CD)", "HTTP/REST")
-Rel(api, cloud, "Armazenamento", "REST")
-Rel(api, messageria_aws, "envia notificações", "")
-Rel(api, marketing, "Salesforce", "")
+Rel(api, aws_DB, "Armazenamento", "REST")
+Rel(api, messageria_aws, "envia notificações", "Python")
+Rel(api, marketing, "Salesforce Gestor da Clinica", "HTTPS/JSON")
+Rel(api, aws_secrets, "Busca credenciais DB", "HTTPS/JSON")
 
+Rel(api, log_file, "Escreve logs (JSON)")
+Rel_Up(grafana_agent, log_file, "Tail de arquivo")
+Rel_Down(grafana_agent, tempo, "Envio de traces")
 
 @enduml

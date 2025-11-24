@@ -35,7 +35,7 @@ Esses arquivos reúnem os principais artefatos do projeto, incluindo a definiç�
 
 ##
 
-#### Requisitos funcionais (RF)
+#### 4. Requisitos funcionais (RF)
 
 | Código | Descrição                                                                                                     |
 |--------|---------------------------------------------------------------------------------------------------------------|
@@ -59,7 +59,7 @@ Esses arquivos reúnem os principais artefatos do projeto, incluindo a definiç�
 
 ##
 
-#### Requisitos não funcionais (RNF)
+#### 5. Requisitos não funcionais (RNF)
 
 | Código | Categoria     | Descrição                                                                                             |
 |--------|---------------|-------------------------------------------------------------------------------------------------------|
@@ -79,7 +79,7 @@ Esses arquivos reúnem os principais artefatos do projeto, incluindo a definiç�
 
 ##
 
-#### 4. Equipe
+#### 6. Equipe
 - Antonio Leoncio Vieira Neto;
 - Lucas Anderson Ribeiro;
 - Victor Furtado.

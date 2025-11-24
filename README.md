@@ -35,6 +35,50 @@ Esses arquivos reúnem os principais artefatos do projeto, incluindo a definiç�
 
 ##
 
+#### Requisitos funcionais (RF)
+
+| Código | Descrição                                                                                                     |
+|--------|---------------------------------------------------------------------------------------------------------------|
+| RF01   | Cadastro de usuários (administradores, atendentes, médicos);                                                  |
+| RF02   | Autenticação de usuários por credenciais únicas;                                                              |
+| RF03   | Gestão de permissões conforme perfil de acesso;                                                               |
+| RF04   | Cadastro de pacientes com dados pessoais, contato, convênio e histórico;                                      |
+| RF05   | Pesquisa de pacientes por nome, CPF, telefone ou convênio;                                                    |
+| RF06   | Criar agendamentos informando médico, paciente, horário e tipo de consulta;                                   |
+| RF07   | Alterar agendamentos, incluindo horário, sala, médico ou tipo;                                                |
+| RF08   | Cancelar agendamentos com registro de motivo;                                                                 |
+| RF09   | Impedir conflitos de horário para médicos e salas;                                                            |
+| RF10   | Exibir disponibilidade de agenda por médico, especialidade e data;                                            |
+| RF11   | Enviar lembretes automáticos aos pacientes (SMS, WhatsApp, e-mail);                                           |
+| RF12   | Enviar notificações internas para a clínica (cancelamentos, alterações, novas marcações);                     |
+| RF13   | Integrar com convênios para validação de carteirinha;                                                         |
+| RF14   | Gerar relatórios de ocupação da agenda por médico, especialidade e período;                                   |
+| RF15   | Gerar relatórios financeiros e indicadores de rentabilidade;                                                  |
+| RF16   | Disponibilizar acesso via plataforma web responsiva.                                                          |
+
+
+##
+
+#### Requisitos não funcionais (RNF)
+
+| Código | Categoria     | Descrição                                                                                             |
+|--------|---------------|-------------------------------------------------------------------------------------------------------|
+| RNF01  | Desempenho    | Tempo de resposta ≤ 4 segundos para ações comuns;                                                     |
+| RNF02  | Desempenho    | O sistema deve suportar aumento de usuários e clínicas sem perda significativa de desempenho;         |
+| RNF03  | Confiabilidade| Disponibilidade mínima de 99,5%;                                                                      |
+| RNF04  | Confiabilidade| Capacidade de recuperação após falhas (tolerância a falhas);                                          |
+| RNF05  | Segurança     | Todos os dados devem trafegar utilizando HTTPS/TLS;                                                   |
+| RNF06  | Segurança     | Conformidade com a LGPD para dados sensíveis;                                                         |
+| RNF07  | Segurança     | Autenticação e autorização baseadas em JWT, OAuth2 ou equivalente;                                    |
+| RNF08  | Usabilidade   | Interface intuitiva seguindo boas práticas de UX;                                                     |
+| RNF09  | Usabilidade   | Compatibilidade com diretrizes básicas de acessibilidade (WCAG);                                      |
+| RNF10  | Manutenibilidade | Código modular e de fácil expansão;                                                                |
+| RNF11  | Manutenibilidade | Sistema deve possuir logs e monitoramento para auditoria e diagnóstico;                            |
+| RNF12  | Portabilidade | Compatível com Chrome, Edge, Firefox e Safari.                                                        |
+
+
+##
+
 #### 4. Equipe
 - Antonio Leoncio Vieira Neto;
 - Lucas Anderson Ribeiro;

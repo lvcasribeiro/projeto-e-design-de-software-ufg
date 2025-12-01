@@ -1,0 +1,74 @@
+@startuml synapsis-webapp-componentes
+
+!include C4_Component.puml
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam dpi 130
+skinparam wrapWidth 220
+skinparam maxMessageSize 100
+
+title Synapsis Health — Componentes da Web UI/UX (com sugestões)
+
+System_Ext(api, "API Gateway / Backend", "Java Spring Boot / REST")
+System_Ext(billing, "Gateway de Pagamentos", "Stripe (Elements / Webhooks)")
+
+package "web_app" as WebApp <<React Application>> {
+
+  package "ui.views" as Views <<Pages/Routes>> {
+    [AgendaView] as AgendaPage <<Page>>
+    [LoginView] as LoginPage <<Page>>
+    [FinanceiroView] as FinanceiroPage <<Page>>
+  }
+
+  package "ui.components" as Components <<Reusable UI>> {
+    [Calendar] as CalendarComp <<Component>>
+    [PatientForm] as FormComp <<Component>>
+    [ErrorBoundary] as ErrorBoundary <<Component>>
+    [SweetAlert2] as Swal <<Component>>
+  }
+
+  package "web.state" as State <<State Management>> {
+    [Redux Store/\nHooks] as AppStore <<Store>>
+    [RealtimeService] as Realtime <<Service>> 
+    note top of AppStore
+      Gerencia o estado global (sessão, dados em cache).
+    end note
+  }
+
+  package "web.api" as ApiAccess <<Data Access>> {
+    [HttpClient] as HttpClient <<Adapter>>
+    interface "AgendaService" as AgendaPort <<API Port>>
+    interface "AuthService" as AuthPort <<API Port>>
+    [PaymentAdapter] as PaymentAdapter <<Adapter>>
+    [TelemetryClient] as Telemetry <<Adapter>>
+  }
+}
+
+' Fluxos
+AgendaPage -Down-> CalendarComp : renderiza
+AgendaPage -Down-> FormComp : renderiza
+AgendaPage -Down-> AppStore : lê/escreve estado
+
+AgendaPage -Right-> AgendaPort : solicita dados (GET /appointments)
+LoginPage -Right-> AuthPort : solicita login/token (POST /auth)
+FinanceiroPage -Right-> PaymentAdapter : inicia pagamento (tokenização)
+
+AgendaPort .Right.> HttpClient : usa para chamadas REST
+AuthPort .Right.> HttpClient : usa para chamadas REST
+HttpClient -Down-> api : Chamadas REST (HTTPS/JSON / JWT)
+PaymentAdapter -Down-> billing : Stripe Elements (tokenização) -> backend confirma
+
+' Extras
+Realtime -Down-> AppStore : atualiza agenda em tempo real (WebSocket / SSE)
+HttpClient -Right-> Telemetry : envia métricas/erros
+ErrorBoundary -Down-> Telemetry : captura erros não tratados
+
+note right of HttpClient
+  - Adiciona token JWT (interceptor)
+  - Lida com 401 -> refresh token flow
+  - Retry/backoff for transient errors
+  - Correlates requestId
+end note
+
+@enduml

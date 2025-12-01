@@ -1,0 +1,70 @@
+@startuml synapsis-chatbot-componentes
+
+!include C4_Component.puml
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam dpi 130
+skinparam wrapWidth 220
+skinparam maxMessageSize 100
+
+title Synapsis Health — Componentes do ChatBot
+
+' Entradas externas (Atores/Containers)
+System_Ext(paciente, "Paciente", "Interage com o Bot")
+System_Ext(suporte, "SAC", "Operador Humano")
+System_Ext(api, "API Gateway / Backend", "Java SpringBoot / REST")
+
+
+package "chatbot" as ChatBot <<ChatBot Application>> {
+
+  package "bot.interface" as Interface <<Messaging Layer>> {
+    [Messaging Gateway] as Gateway <<Component>>
+  }
+
+  package "bot.nlp" as NLP <<Natural Language Processing>> {
+    [Intent Recognizer] as IntentRecognizer <<Component>>
+    [Entity Extractor] as EntityExtractor <<Component>>
+
+    note right of IntentRecognizer
+      Identifica a intenção do usuário
+      (ex: AGENDAR, CANCELAR, FALAR_COM_HUMANO).
+    end note
+  }
+
+  package "bot.dialog" as Dialog <<Flow Orchestration>> {
+    [Dialog Manager] as DialogManager <<Component>>
+    [State Tracker] as StateTracker <<Component>>
+  }
+
+  package "bot.integrations" as Integrations <<External Adapters>> {
+    interface "Business API Port" as BusinessPort <<API Port>>
+    [Human Handover] as HandoverAdapter <<Adapter>>
+  }
+}
+
+' FLUXO PRINCIPAL: ENTRADA E INTENÇÃO
+paciente -Down-> Gateway : Mensagem
+Gateway -Right-> IntentRecognizer : encaminha texto
+IntentRecognizer -Down-> EntityExtractor : identifica dados
+EntityExtractor -Up-> DialogManager : passa intenção e dados
+
+' FLUXO: DIÁLOGO E RESPOSTA
+DialogManager -Down-> StateTracker : lê/escreve contexto de conversa
+DialogManager -Down-> BusinessPort : consulta/executa operação de negócio
+DialogManager -Down-> HandoverAdapter : aciona transferência
+DialogManager -Up-> Gateway : envia resposta
+
+' FLUXO: INTEGRAÇÕES EXTERNAS
+BusinessPort -Down-> api : Chamadas REST (ex: Checar agenda)
+HandoverAdapter -Right-> suporte : Notifica/transfere chat 
+
+
+note right of DialogManager
+  Orquestra o fluxo da conversa:
+  - Respostas estáticas
+  - Chamadas para API de Negócio
+  - Transferência para operador
+end note
+
+@enduml

@@ -1,0 +1,99 @@
+@startuml synapsis-backend-components
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Synapsis Health — Component (API Gateway / Backend)
+
+System_Ext(config_server, "Config service (CI/CD)", "HTTP/REST")
+System_Ext(aws_DB, "Amazon Aurora / PostgreSQL", "DBaaS")
+System_Ext(aws_secrets, "AWS Secrets Manager", "Credenciais DB")
+
+Person(admin, "Administrador")
+Person(secretaria, "Secretária")
+Person(medico, "Médico")
+Person(paciente, "Paciente")
+Person(gestor, "Gestor da Clínica")
+
+' ---------------------------
+'   API Gateway - Components
+' ---------------------------
+package "API Layer (Controllers)" {
+
+  Component(AgendaController, "AgendaController", "REST Controller", "Endpoints de agendamentos, horários, cancelamentos.")
+  Component(PacienteController, "PacienteController", "REST Controller", "Cadastro, consultas, histórico.")
+  Component(AuthController, "AuthController", "REST Controller", "Login, refresh, JWT validation.")
+  Component(PagamentoController, "PagamentoController", "REST Controller", "Assinaturas e billing.")
+  Component(RelatoriosController, "RelatoriosController", "REST Controller", "Dashboards e indicadores para gestores.")
+}
+
+package "Domain Layer (Core Services)" {
+
+  Component(AgendaService, "AgendaService", "Service", "Regras de negócio dos agendamentos.")
+  Component(PacienteService, "PacienteService", "Service", "Regras de pacientes.")
+  Component(PagamentoService, "PagamentoService", "Service", "Assinaturas e repasses.")
+  Component(RelatoriosService, "RelatoriosService", "Service", "KPIs e relatórios.")
+  Component(AuthService, "AuthService", "Service", "Gera/valida tokens JWT.")
+}
+
+package "Persistence Layer" {
+
+  Component(AgendaRepository, "AgendaRepository", "Repository", "Persistência de consultas/agenda.")
+  Component(PacienteRepository, "PacienteRepository", "Repository", "Dados de pacientes.")
+  Component(PagamentoRepository, "PagamentoRepository", "Repository", "Assinaturas e cobranças.")
+  Component(RelatoriosRepository, "RelatoriosRepository", "Repository", "Views analíticas.")
+}
+
+package "Integration Layer (Adapters)" {
+
+  Component(ConveniosClient, "ConveniosClient", "HTTP Client", "Consulta convênios / regras TISS.")
+  Component(BillingClient, "BillingClient", "HTTP Client", "Integração com Stripe/Pagar.Me.")
+  Component(MarketingClient, "MarketingClient", "HTTP Client", "Integra com CRM médico.")
+  Component(NotificationClient, "NotificationClient", "SNS/Lambda Client", "Dispara notificações externas.")
+  Component(ConfigClient, "ConfigClient", "Config Client", "Busca configs e feature flags.")
+  Component(DatabaseDriver, "DatabaseDriver", "JDBC/ORM", "Driver para PostgreSQL.")
+  Component(SecretsClient, "SecretsClient", "AWS SDK", "Carrega credenciais do DB.")
+}
+
+
+' ---------------------------
+'     RELACIONAMENTOS
+' ---------------------------
+
+' Pessoas -> Controllers
+Rel(secretaria, AgendaController, "Gerencia consultas", "HTTPS/JSON")
+Rel(medico, AgendaController, "Consulta agenda", "HTTPS/JSON")
+Rel(paciente, PacienteController, "Consulta histórico / agenda", "HTTPS/JSON")
+Rel(gestor, RelatoriosController, "Gera relatórios", "HTTPS/JSON")
+Rel(admin, AuthController, "Administra usuários", "HTTPS/JSON")
+
+' Controllers -> Services
+Rel(AgendaController, AgendaService, "chama")
+Rel(PacienteController, PacienteService, "chama")
+Rel(PagamentoController, PagamentoService, "chama")
+Rel(RelatoriosController, RelatoriosService, "chama")
+Rel(AuthController, AuthService, "valida credenciais")
+
+' Services -> Repository
+Rel(AgendaService, AgendaRepository, "consulta/salva")
+Rel(PacienteService, PacienteRepository, "consulta/salva")
+Rel(PagamentoService, PagamentoRepository, "consulta/salva")
+Rel(RelatoriosService, RelatoriosRepository, "consulta KPIs")
+
+' Services -> External Integrations
+Rel(AgendaService, ConveniosClient, "consulta convênios")
+Rel(PagamentoService, BillingClient, "processa pagamentos")
+Rel(PacienteService, MarketingClient, "envia dados de engajamento")
+Rel(AgendaService, NotificationClient, "envia lembretes notificações")
+
+' Repository -> DB
+Rel(AgendaRepository, DatabaseDriver, "persistência")
+Rel(DatabaseDriver, aws_DB, "SQL/PostgreSQL")
+
+' Secrets Manager
+Rel(DatabaseDriver, SecretsClient, "obtém credenciais")
+Rel(SecretsClient, aws_secrets, "HTTPS/JSON")
+
+' Config
+Rel(ConfigClient, config_server, "carrega configs / flags")
+Rel(AuthService, ConfigClient, "lê políticas de sessão")
+
+@enduml
